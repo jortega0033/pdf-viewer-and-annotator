@@ -1,0 +1,68 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>PDF viewer and annotator</title>
+<link rel="stylesheet" href="/app.css">
+<script src="/app.js" defer></script>
+</head>
+<body>
+<header class="site-header">
+  <h1 id="doc-title">Loading document</h1>
+  <p id="doc-meta" class="meta"></p>
+  <p><a id="download-link" href="/api/v1/document/file">Download sample PDF</a></p>
+</header>
+
+<main class="layout">
+  <section class="pane" aria-labelledby="preview-heading">
+    <h2 id="preview-heading">Page preview</h2>
+    <div class="canvas-wrap">
+      <canvas id="page-canvas" role="img" aria-label="Page preview not loaded" width="300" height="200"></canvas>
+    </div>
+    <div class="pager">
+      <button type="button" id="prev-page" disabled>Previous page</button>
+      <span id="page-indicator" class="indicator">Page 0 of 0</span>
+      <button type="button" id="next-page" disabled>Next page</button>
+    </div>
+    <h3 id="text-heading">Page contents as text</h3>
+    <ul id="page-text" aria-labelledby="text-heading"></ul>
+  </section>
+
+  <section class="pane" aria-labelledby="note-heading">
+    <h2 id="note-heading">Page note</h2>
+    <form id="note-form" novalidate>
+      <div class="field">
+        <label for="note-title">Note title</label>
+        <input type="text" id="note-title" maxlength="120" autocomplete="off" disabled aria-describedby="title-count">
+        <span id="title-count" class="counter">0 / 120</span>
+      </div>
+      <div class="field">
+        <label for="note-body">Page note</label>
+        <textarea id="note-body" maxlength="4000" rows="9" disabled aria-describedby="body-count"></textarea>
+        <span id="body-count" class="counter">0 / 4000</span>
+      </div>
+      <div class="actions">
+        <button type="submit" id="save-note" disabled>Save note</button>
+        <button type="button" id="retry" hidden>Retry</button>
+      </div>
+      <p class="hint">Shortcut: Ctrl+S or Cmd+S saves the note.</p>
+    </form>
+
+    <p id="status" role="status" aria-live="polite">Loading...</p>
+
+    <div id="conflict" role="alert" hidden>
+      <h3>Note changed elsewhere</h3>
+      <p>Another save updated this page. Your typed text is still in the form.</p>
+      <p><strong>Saved title:</strong> <span id="conflict-title"></span></p>
+      <p><strong>Saved note:</strong></p>
+      <pre id="conflict-body"></pre>
+      <div class="actions">
+        <button type="button" id="conflict-keep">Keep my text and save over</button>
+        <button type="button" id="conflict-use-saved">Use saved version</button>
+      </div>
+    </div>
+  </section>
+</main>
+</body>
+</html>
