@@ -18,6 +18,10 @@ python -m pdf_annotator --data-dir ./data --port 8765
 
 The server binds `127.0.0.1` only. `--data-dir` and `--port` are both required. Stop it with Ctrl+C.
 
+## Ticket work
+
+To implement an issue, follow the steps in [.claude/skills/implement-ticket/SKILL.md](.claude/skills/implement-ticket/SKILL.md) and the section "Agent roles and ticket work" in [CLAUDE.md](CLAUDE.md). The role definitions are in `.claude/agents/`; each starts with a section "In this repository". An agent that cannot start Claude Code subagents uses those files as the instructions for each step and says in the pull request which steps it did itself.
+
 ## Loop conventions
 
 - The loop runs at L1: report-only, started by hand. It proposes; it does not label, comment, close, edit source, push or merge.
