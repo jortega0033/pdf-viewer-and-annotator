@@ -109,30 +109,30 @@ Parser codes (`PdfError.code`): `too_large`, `bad_xref`, `bad_offset`, `unsuppor
 | Acceptance matrix row 11, no horizontal scroll at 800x600; also 360 px wide (6.4) | Implemented | Seen in a local browser: document width 785 at a window width of 800, and 360 at 360 |
 | "Use saved version", the Retry button, Ctrl+S, the unload prompt, keyboard-only operation, contrast of 4.5:1 (6.4, 8) | Needs verification | In the code (`app.js`, `app.css`); not exercised during preparation |
 | Linux and Python 3.12 (section 5, README) | Needs verification | The README reports a run on Ubuntu 24.04 under WSL with Python 3.12.3; preparation ran Windows and Python 3.13.14 only |
-| P1 opening a file chosen by the person | Planned | #NEW-A (document routes and parse cache), #NEW-B (upload and store) |
+| P1 opening a file chosen by the person | Planned | #7 (document routes and parse cache), #8 (upload and store) |
 | P1 cross-reference streams, object streams, Flate, update chains | Planned | #2 |
-| P2 page tree, inherited resources, vector and text operators | Planned | #3; text in fonts outside the standard set: #NEW-C |
+| P2 page tree, inherited resources, vector and text operators | Planned | #3; text in fonts outside the standard set: #9 |
 | P3 images, rotation, zoom, bounded page cache | Planned | #4 |
 | P4 notes anchored to page regions | Planned | #5 |
 | P5 export as an incremental update | Planned | #6 |
-| Reconciling the PRD, the README and this file once the work is in | Planned | #NEW-D |
+| Reconciling the PRD, the README and this file once the work is in | Planned | #10 |
 
 ## 8. Where the PRD and the code differ
 
 | # | Finding | Effect | Handled by |
 |---|---|---|---|
-| D1 | PRD 6.1 says a note request answers 404 "outside 1..2". The code compares with the parsed page count (`server.py:270-275`) | Same result for the sample only | #NEW-A rewrites the route table in PRD 6.1 |
-| D2 | The PRD gives no shape for the display list, and its API table does not list `document_id`, `title`, `size_bytes` and `sha256`. The only written contract was a preparation note that is not in the repository | A reader of the repository cannot learn the contract from the PRD | Section 5 above; #NEW-A moves the shape into the PRD when it splits the list by page |
-| D3 | PRD 6.1 lists statuses but not the error codes, the 405 or the 422 on note routes. `send_error` also maps 408 to `request_timeout` (`server.py:158-169`), which was not seen and may be unreachable | Clients must read the code | Section 6 above; #NEW-A |
-| D4 | PRD 9 says mutating requests "check Origin". A `PUT` without an `Origin` header is accepted (`server.py:285-289`) | Deliberate: non-browser local tools can write. Every new mutating route must make the same choice on purpose | Stated in #NEW-B, #5 and #6 |
-| D5 | PRD 6.4 does not list the link "Download sample PDF" (`index.html:14`), the counters `title-count` and `body-count`, or the ids `note-form`, `conflict-title` and `conflict-body` | Minor | #NEW-D |
+| D1 | PRD 6.1 says a note request answers 404 "outside 1..2". The code compares with the parsed page count (`server.py:270-275`) | Same result for the sample only | #7 rewrites the route table in PRD 6.1 |
+| D2 | The PRD gives no shape for the display list, and its API table does not list `document_id`, `title`, `size_bytes` and `sha256`. The only written contract was a preparation note that is not in the repository | A reader of the repository cannot learn the contract from the PRD | Section 5 above; #7 moves the shape into the PRD when it splits the list by page |
+| D3 | PRD 6.1 lists statuses but not the error codes, the 405 or the 422 on note routes. `send_error` also maps 408 to `request_timeout` (`server.py:158-169`), which was not seen and may be unreachable | Clients must read the code | Section 6 above; #7 |
+| D4 | PRD 9 says mutating requests "check Origin". A `PUT` without an `Origin` header is accepted (`server.py:285-289`) | Deliberate: non-browser local tools can write. Every new mutating route must make the same choice on purpose | Stated in #8, #5 and #6 |
+| D5 | PRD 6.4 does not list the link "Download sample PDF" (`index.html:14`), the counters `title-count` and `body-count`, or the ids `note-form`, `conflict-title` and `conflict-body` | Minor | #10 |
 | D6 | PRD 6.3 lists four limits. The code has eleven (`pdfparse.py:12-22`), among them 1,000 cross-reference entries, nesting depth 8, 64 entries per array or dictionary, 16 operands, page side 14,400 points | The planned work changes most of them; each ticket must say which | #2, #3; README "Limits" in the same pull request |
-| D7 | The PRD says nothing about cost. Every note request parses the whole PDF again (`server.py:263-277`), and the document request sends all pages at once | Harmless at 952 bytes; not acceptable for files of megabytes | #NEW-A |
-| D8 | The document id is the constant `"sample"` in two modules. PRD 13 leaves open whether notes are keyed by a content hash | Notes of two files would collide | #NEW-A (one definition, id in the route), #NEW-B (SHA-256 of the file as the id) |
+| D7 | The PRD says nothing about cost. Every note request parses the whole PDF again (`server.py:263-277`), and the document request sends all pages at once | Harmless at 952 bytes; not acceptable for files of megabytes | #7 |
+| D8 | The document id is the constant `"sample"` in two modules. PRD 13 leaves open whether notes are keyed by a content hash | Notes of two files would collide | #7 (one definition, id in the route), #8 (SHA-256 of the file as the id) |
 | D9 | PRD 3 makes P2 depend on P1, P3 on P2, P4 on P3. Read against the code, the content work (P2) needs the document object but not the compressed file structures, and the storage half of P4 needs neither images nor rotation | The strict chain hides work that can run side by side | The epic's dependency table |
 | D10 | Issue #3 keeps the limit of 500 operators per page; issue #4 asks for a 30-page document while the code allows 10 pages; no issue states the new page, object or operator limits | Real files exceed 500 operators on almost every page, so the epic's outcome cannot be met with that limit | #2 and #3 set and document the new limits |
-| D11 | PRD 10 ends with "execution results are not claimed here", while the README reports a verified baseline | Not a contradiction, but the PRD statuses will go stale | #NEW-D |
-| D12 | PRD 12 says browser behaviour is checked by hand. Issue #4 introduces a self-check page in plain JavaScript | The PRD test plan must name it once it exists | #4, #NEW-D |
+| D11 | PRD 10 ends with "execution results are not claimed here", while the README reports a verified baseline | Not a contradiction, but the PRD statuses will go stale | #10 |
+| D12 | PRD 12 says browser behaviour is checked by hand. Issue #4 introduces a self-check page in plain JavaScript | The PRD test plan must name it once it exists | #4, #10 |
 | D13 | The PRD asks that an independent checker for P5 be confirmed in the workspace first. On the preparation machine `pdftotext` 4.00 (Xpdf, shipped with Git for Windows) is on the path and read the sample without a message; `qpdf`, `mutool` and Ghostscript are not installed | One independent reader is available on this machine; none is guaranteed elsewhere | #6 |
 
 ## 9. What was run during preparation

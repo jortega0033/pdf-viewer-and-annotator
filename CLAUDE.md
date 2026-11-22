@@ -13,7 +13,7 @@ An offline workbench for one person who reviews a PDF and keeps notes on it. One
 | Product scope, milestones, contracts, fixture, acceptance matrix | [docs/PRD.md](docs/PRD.md) |
 | How the code is built, the traced save workflow, the rules the code keeps, the display list and error codes as emitted, differences between the PRD and the code | [docs/architecture.md](docs/architecture.md) |
 | Launch, smoke steps, limits, baseline verification | [README.md](README.md) |
-| Backlog | Epic issue #1 and its sub-issues on GitHub: #NEW-A, #NEW-B, #2, #3, #4, #NEW-C, #5, #6, #NEW-D, in dependency order. The epic gives the dependencies, the parallel tracks and the estimates. |
+| Backlog | Epic issue #1 and its sub-issues on GitHub: #7, #8, #2, #3, #4, #9, #5, #6, #10, in dependency order. The epic gives the dependencies, the parallel tracks and the estimates. |
 | Loop setup and its limits | [LOOP.md](LOOP.md), [loop-constraints.md](loop-constraints.md) |
 | Project subagents and their origin | [.claude/agency-agents/README.md](.claude/agency-agents/README.md) |
 
