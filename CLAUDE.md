@@ -111,8 +111,10 @@ Put these in the pull request description. Paste real output; do not summarise a
 4. For a schema change: the test that opens a database created by the previous schema version, and the new `user_version`.
 5. For a new or changed route: one request and response pair per success and per error code, taken from a server started with `--port 0` on a scratch data directory, and the PRD section 6.1 diff.
 6. For a change under `pdf_annotator/static/`: a browser run on `http://127.0.0.1:<port>/` with the browser name and version, the viewport sizes checked (800x600 and 360x640), keyboard-only operation of the changed controls, the text equivalent of what was drawn, and the console and network log free of errors and of external requests. Browser checks are manual: the repository has no approved browser automation.
-7. Green CI on the pull request (`gh pr checks`), and `git status` showing no stray files, and confirmation that no dependency, external URL, non-loopback listener or third-party file was added.
+7. `git status` showing no stray files, and confirmation that no dependency, external URL, non-loopback listener or third-party file was added.
 8. Anything not verified, said plainly.
+
+CI is not part of this list for the gates. The order is fixed: local checks pass, Code Reviewer then Reality Checker run on the full diff and the recorded local evidence, only then the draft pull request is opened, CI runs on it, and the pull request is marked ready only when CI is green (`gh pr checks`). Reality Checker checks the local evidence and that CI is configured to run the documented checks; it is not asked to confirm a CI result. The driver checks green CI before `gh pr ready`. If CI fails, fix, re-run the local checks and both gates, and push.
 
 ## Agent roles and ticket work
 
@@ -141,9 +143,9 @@ Delegate without waiting to be asked. Each role's `description` ends with a "Use
 How a ticket gets from the backlog to a ready pull request. Each piece is defined in its own file; this part only links them.
 
 - Driver and playbook: the owner starts one ticket with `/next-ticket` ([`.claude/skills/next-ticket/SKILL.md`](.claude/skills/next-ticket/SKILL.md)), which runs [`.claude/skills/implement-ticket/SKILL.md`](.claude/skills/implement-ticket/SKILL.md). Starting it is the owner's go signal and the request to push the ticket branch and open the pull request.
-- Gate hook: [`.claude/hooks/role_gate.py`](.claude/hooks/role_gate.py), wired in [`.claude/settings.json`](.claude/settings.json), blocks `gh pr create` and `gh pr ready` until Code Reviewer and Reality Checker ran after the last code edit. `ROLE_GATE=off` in the environment Claude Code is started from switches it off for that session; only the owner does that.
+- Gate hook: [`.claude/hooks/role_gate.py`](.claude/hooks/role_gate.py), wired in [`.claude/settings.json`](.claude/settings.json), blocks `gh pr create` (including `--draft`) and `gh pr ready` until Code Reviewer and Reality Checker ran after the last code edit. `ROLE_GATE=off` in the environment Claude Code is started from switches it off for that session; only the owner does that.
 - Permissions: the allow, ask and deny rules are in `.claude/settings.json`. Pushes to `main`, force pushes, merges and releases are denied; edits to CI, agent configuration and Loop files ask first.
-- CI: [`.github/workflows/ci.yml`](.github/workflows/ci.yml). The `test` job must be green before a pull request is marked ready.
+- CI: [`.github/workflows/ci.yml`](.github/workflows/ci.yml). It runs on the draft pull request, after the local checks and both gates; the `test` job must be green before the pull request is marked ready.
 - Pull request: fill in [`.github/pull_request_template.md`](.github/pull_request_template.md). Tickets use [`.github/ISSUE_TEMPLATE/implementation-ticket.md`](.github/ISSUE_TEMPLATE/implementation-ticket.md).
 - Labels: `status:ready`, `status:blocked`, `status:in-progress`, `needs-decision`; epic #1 gives the dependency order.
 - Changelog: every ticket pull request adds one line to [CHANGELOG.md](CHANGELOG.md).

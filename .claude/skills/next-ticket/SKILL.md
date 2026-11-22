@@ -19,8 +19,8 @@ Rules in `CLAUDE.md` and `docs/owner-decisions.md` bind this run. Where they dif
 4. **Fresh worktree and branch, inside the project.** Run `git fetch origin`, then create the ticket worktree under `.claude/worktrees/` (ignored by git) from `origin/main` and make it the session's working directory: use Claude Code's built-in worktree support (the `EnterWorktree` tool), or `git worktree add .claude/worktrees/<n> -b <n>-<short-slug> origin/main` followed by `cd` into it. Do not create it outside the project directory: hook events would keep the main checkout as `cwd` and the review gate (`role_gate.py`) would check the wrong diff. Work only there. Never work on `main`.
 5. **Implement.** Follow `.claude/skills/implement-ticket/SKILL.md` to the end, including both gates on the current diff, the CHANGELOG line and the `unslop` pass.
 6. **Push and open the pull request.** Only after both gates passed on the current diff: push the branch (`git push -u origin <branch>`) and open a draft pull request from the template that says `Closes #<n>`. Run `gh pr create` and `gh pr ready` with the session's working directory in the ticket worktree. The gate hook blocks this until the gates ran.
-7. **Wait for CI.** `gh pr checks <pr> --watch`. Fix and re-run the gates if code changes. If CI cannot go green, stop and report; do not mark the pull request ready.
-8. **Mark ready and report.** When CI is green: `gh pr ready <pr>`, then comment on the issue with the pull request link, the evidence summary and anything not verified.
+7. **Wait for CI.** `gh pr checks <pr> --watch`. If it fails, fix, re-run the local checks and both gates, and push. If CI cannot go green, stop and report; do not mark the pull request ready.
+8. **Mark ready and report.** When CI is green: `gh pr ready <pr>`, then comment on the issue with the pull request link, the CI run link, the evidence summary and anything not verified.
 
 ## Limits
 
