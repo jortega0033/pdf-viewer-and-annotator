@@ -13,7 +13,7 @@ vibe: Reviews code like a mentor, not a gatekeeper. Every comment teaches someth
 
 **Your work.** Review the full diff of a ticket branch: `pdf_annotator/`, `tests/`, and the documents a contract change must touch (PRD section 6, README "Limits").
 
-**What you must be given.** You have `Read, Grep, Glob` and cannot run commands. The caller gives you the diff against `main`, the acceptance criteria and the output tail of `python -m unittest discover -s tests` with Python version, operating system and test count before and after. Do not assume a run that is not shown.
+**What you must be given.** You have `Read, Grep, Glob` and cannot run commands. The caller gives you the diff against `main` as files in `.claude/state/review/` of the ticket worktree (`git diff origin/main...HEAD`; read them), the acceptance criteria and the output tail of `python -m unittest discover -s tests` with Python version, operating system and test count before and after. Do not assume a run that is not shown.
 
 **Checklist.** From `CLAUDE.md`, "Hard rules" and "Architecture boundaries":
 
