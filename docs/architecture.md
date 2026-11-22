@@ -101,7 +101,7 @@ Parser codes (`PdfError.code`): `too_large`, `bad_xref`, `bad_offset`, `unsuppor
 | M1 generated two-page sample (section 7) | Implemented | `pdfgen.py`; 952 bytes, same hash on every start |
 | Parsing of the classic cross-reference table and ASCII content, operator allowlist, limits (6.3) | Implemented | `tests/test_pdfparse.py`, 22 tests |
 | Canvas drawing and text equivalent (6.3, 6.4) | Implemented | Seen in a local browser: both pages, the list under the preview, the swatch pixel `rgb(51,102,204)` |
-| Page navigation (6.4) | Implemented | Seen in a local browser |
+| Page navigation (6.4) | Implemented | "Next page" pressed in a local browser; "Previous page" was enabled on page 2 but not pressed |
 | Page note in SQLite, kept across a restart (6.2, 8) | Implemented | `test_restart_persistence`; also seen in a local browser after a restart |
 | Stale-save handling with the conflict panel (6.3, 8) | Implemented | `test_conflict_preserves_current`, `test_concurrent_puts_one_winner`; panel and "Keep my text and save over" seen in a local browser |
 | API (6.1) and security rules (9) | Implemented | `tests/test_api.py`; 403, 404, 405, 409, 415 also seen with `curl` |
@@ -145,7 +145,7 @@ All on Windows 11, Python 3.13.14, SQLite 3.50.4, once each, from a worktree at 
 - A local browser (Chromium 156 engine) on `http://127.0.0.1:18791/`: both pages, the text list, save ("Saved revision 2"), a stale save with the conflict panel and the typed text kept, "Keep my text and save over" ("Saved revision 4"), the same note after a server restart, no horizontal overflow at 800x600 and 360x640, nine requests, all to `127.0.0.1`.
 - Both server processes were stopped by process id and the port was free afterwards.
 
-Not run: Linux, Python 3.12, Firefox, a screen reader, keyboard-only operation, the Retry path, "Use saved version".
+Not run: Linux, Python 3.12, Firefox, a screen reader, keyboard-only operation, a click on "Previous page", the Retry path, "Use saved version".
 
 ## 10. Risks for the planned work
 
