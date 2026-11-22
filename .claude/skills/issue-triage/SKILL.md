@@ -55,7 +55,7 @@ Needs human: H
 - Escalate to "needs human": auth, payments, security, public API, billing, infra
 - Duplicate matching: conservative — say "possible duplicate of #NNN", never auto-close
 - Prune closed issues from state each run
-- Be concise — this may run every 2h on busy repos
+- Be concise. In this repository a person starts every run (see `LOOP.md`); the 2h cadence of the upstream pattern does not apply here
 
 ## Allowlisted labels (L2 only, after verifier)
 
