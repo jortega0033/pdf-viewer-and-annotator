@@ -13,7 +13,7 @@ An offline workbench for one person who reviews a PDF and keeps notes on it. One
 | Product scope, milestones, contracts, fixture, acceptance matrix | [docs/PRD.md](docs/PRD.md) |
 | How the code is built, the traced save workflow, the rules the code keeps, the display list and error codes as emitted, differences between the PRD and the code | [docs/architecture.md](docs/architecture.md) |
 | Launch, smoke steps, limits, baseline verification | [README.md](README.md) |
-| Backlog | Epic issue #1 and its sub-issues on GitHub: #7, #8, #2, #3, #4, #9, #5, #6, #10, in dependency order. The epic gives the dependencies, the parallel tracks and the estimates. |
+| Backlog | Epic issue #1 and its parents on GitHub: #7, #8, #2, #3, #4, #9, #5, #6, #12, #10, in dependency order. Parents labelled `tracking` are split into sub-issues of 1 to 4 hours (one pull request each); only a leaf is work. The epic gives the dependencies, the parallel tracks and the estimates. |
 | Loop setup and its limits | [LOOP.md](LOOP.md), [loop-constraints.md](loop-constraints.md) |
 | Delivery workflow, owner decisions, UI rules | [docs/owner-decisions.md](docs/owner-decisions.md), [docs/ui-quality.md](docs/ui-quality.md) |
 | Project subagents and their origin | [.claude/agency-agents/README.md](.claude/agency-agents/README.md) |
@@ -144,10 +144,11 @@ How a ticket gets from the backlog to a ready pull request. Each piece is define
 
 - Driver and playbook: the owner starts one ticket with `/next-ticket` ([`.claude/skills/next-ticket/SKILL.md`](.claude/skills/next-ticket/SKILL.md)), which runs [`.claude/skills/implement-ticket/SKILL.md`](.claude/skills/implement-ticket/SKILL.md). Starting it is the owner's go signal and the request to push the ticket branch and open the pull request.
 - Gate hook: [`.claude/hooks/role_gate.py`](.claude/hooks/role_gate.py), wired in [`.claude/settings.json`](.claude/settings.json), blocks `gh pr create` (including `--draft`) and `gh pr ready` until Code Reviewer and Reality Checker ran after the last code edit. `ROLE_GATE=off` in the environment Claude Code is started from switches it off for that session; only the owner does that.
-- Permissions: the allow, ask and deny rules are in `.claude/settings.json`. Pushes to `main`, force pushes, merges and releases are denied; edits to CI, agent configuration and Loop files ask first.
+- Permissions: the allow, ask and deny rules are in `.claude/settings.json`. Pushes to `main`, force pushes, merges and releases are denied; edits to CI, agent configuration and Loop files ask first, at any depth, so the copies in a ticket worktree ask too.
 - CI: [`.github/workflows/ci.yml`](.github/workflows/ci.yml). It runs on the draft pull request, after the local checks and both gates; the `test` job must be green before the pull request is marked ready.
 - Pull request: fill in [`.github/pull_request_template.md`](.github/pull_request_template.md). Tickets use [`.github/ISSUE_TEMPLATE/implementation-ticket.md`](.github/ISSUE_TEMPLATE/implementation-ticket.md).
-- Labels: `status:ready`, `status:blocked`, `status:in-progress`, `needs-decision`; epic #1 gives the dependency order.
+- Labels: `status:ready`, `status:blocked`, `status:in-progress`, `needs-decision`, `tracking`; epic #1 gives the dependency order. A `tracking` ticket or one with open sub-issues is a container that `/next-ticket` never picks; the pull request of a parent's last open sub-issue also says `Closes #<parent>`.
+- Review and CI wait: the read-only reviewers get the diff and evidence as files in `.claude/state/review/` of the ticket worktree. After the draft pull request the run ends its turn with "Draft pull request #N is waiting for CI" and reads `gh pr checks` once when woken; it does not poll. Acceptance steps that need a person go under "Owner checks" in the pull request.
 - Changelog: every ticket pull request adds one line to [CHANGELOG.md](CHANGELOG.md).
 - UI and writing: [docs/ui-quality.md](docs/ui-quality.md) binds every screen; copy, documentation and pull request text go through the `unslop` skill.
 - Decisions, security, release: [docs/owner-decisions.md](docs/owner-decisions.md), [SECURITY.md](SECURITY.md), [docs/RELEASING.md](docs/RELEASING.md).

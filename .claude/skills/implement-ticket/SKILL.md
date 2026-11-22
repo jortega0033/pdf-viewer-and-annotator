@@ -20,12 +20,12 @@ The project subagents in `.claude/agents/` are part of the work. Delegate to the
 6. **Test.** Add or change tests for every acceptance criterion and material edge case, then run the checks listed in `CLAUDE.md`. Record each command and its result. For a UI ticket, check each changed screen against `docs/ui-quality.md` and record the result.
 7. **Finalize the diff.** Before any gate runs, add one line to `CHANGELOG.md` under `Unreleased`, and run the `unslop` skill over user-facing copy, documentation and the pull request text, so the gates judge the final diff.
 8. **Specialist review.** Run every role in the table "After coding" whose trigger matches the change.
-9. **Review gate, always.** Run Code Reviewer on the full diff. Fix every material finding, re-run the checks, and have the reviewer look again until no material finding is left.
-10. **Acceptance gate, always.** Run Reality Checker with the ticket's acceptance criteria and the recorded local evidence. It checks that the documented checks ran locally and passed and that CI is configured to run them; it is not asked for a CI result, which does not exist yet. Do not open a pull request unless it passes.
+9. **Review gate, always.** Reviewers have no shell, so first write the diff and the local evidence to `.claude/state/review/` in the ticket worktree (`git diff --stat origin/main...HEAD`, `git diff origin/main...HEAD`, the check outputs) and name those files in each request. Run Code Reviewer on the full diff. Fix every material finding, re-run the checks, and have the reviewer look again until no material finding is left.
+10. **Acceptance gate, always.** Run Reality Checker with the ticket's acceptance criteria and the recorded local evidence. It checks that the documented checks ran locally and passed and that CI is configured to run them; it is not asked for a CI result, which does not exist yet. Do not open a pull request unless it passes. An acceptance step that needs a person ("by hand in a normal browser", "manual, recorded") is done as far as an agent can (a scripted or headless run, with the evidence) and the rest goes under "Owner checks" in the pull request; Reality Checker accepts that only when the ticket marks the step as manual.
 11. **Hand off.**
     - Capture the evidence `CLAUDE.md` asks for and fill in `.github/pull_request_template.md`.
     - After both gates passed on the current diff, push the branch and open a draft pull request that names the issue. A `/next-ticket` run counts as the owner's request to push and open it; otherwise do not push unless the owner asked in the current session. The gate hook blocks `gh pr create` and `gh pr ready` until the gate roles ran after the last code edit.
-    - CI runs on the draft pull request. If it fails, fix, re-run the local checks and both gates, and push. Mark the pull request ready only when CI is green (`gh pr checks`); that is checked here, not by Reality Checker.
+    - CI runs on the draft pull request. If it fails, fix, re-run the local checks and both gates, and push. Mark the pull request ready only when CI is green (`gh pr checks`, read once when the session is woken, not polled); that is checked here, not by Reality Checker. Only a leaf ticket is work: a `tracking` ticket or one with open sub-issues is a container, and the pull request of a parent's last open sub-issue also says `Closes #<parent>`.
     - Only the owner merges. Never merge, and never push to the default branch.
 
 ## Roles
@@ -62,6 +62,7 @@ The project subagents in `.claude/agents/` are part of the work. Delegate to the
 
 ## Rules
 
+- Do not change agent configuration (`.claude/agents/`, `.claude/skills/`, `.claude/hooks/`, `.claude/settings.json`) in a ticket, neither by edit nor by shell command.
 - The session or role that wrote a change does not count as its reviewer.
 - Read-only reviewers cannot run commands. Give them the diff, the acceptance criteria and the recorded command output.
 - Where a role's general advice (frameworks, dependencies, cloud services) conflicts with `CLAUDE.md`, `CLAUDE.md` wins.
