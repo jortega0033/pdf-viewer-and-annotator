@@ -1,0 +1,158 @@
+# CLAUDE.md
+
+Working instructions for this repository. Read this file first, then the documents it links to. It does not repeat them.
+
+## What this is
+
+An offline workbench for one person who reviews a PDF and keeps notes on it. One Python package, standard library only, serves a JSON API and a static page on `127.0.0.1`, parses PDF bytes with its own strict parser, draws pages on a canvas with a text equivalent, and keeps notes in one SQLite file. M1 is implemented: a generated two-page sample, page navigation, one titled note per page, stale-save handling, notes kept across a restart. Opening a file chosen by the person, compressed file structures, page trees, vector and text operators, images, rotation, notes on page regions and export as an incremental update are planned and tracked in the epic, issue #1.
+
+## Sources of truth
+
+| Topic | Document |
+|---|---|
+| Product scope, milestones, contracts, fixture, acceptance matrix | [docs/PRD.md](docs/PRD.md) |
+| How the code is built, the traced save workflow, the rules the code keeps, the display list and error codes as emitted, differences between the PRD and the code | [docs/architecture.md](docs/architecture.md) |
+| Launch, smoke steps, limits, baseline verification | [README.md](README.md) |
+| Backlog | Epic issue #1 and its sub-issues on GitHub: #7, #8, #2, #3, #4, #9, #5, #6, #10, in dependency order. The epic gives the dependencies, the parallel tracks and the estimates. |
+| Loop setup and its limits | [LOOP.md](LOOP.md), [loop-constraints.md](loop-constraints.md) |
+| Delivery workflow, owner decisions, UI rules | [docs/owner-decisions.md](docs/owner-decisions.md), [docs/ui-quality.md](docs/ui-quality.md) |
+| Project subagents and their origin | [.claude/agency-agents/README.md](.claude/agency-agents/README.md) |
+
+When the PRD and the code disagree, the code is the baseline and [docs/architecture.md](docs/architecture.md) records the difference. A ticket that changes a contract updates PRD section 6 and the README "Limits" section in the same pull request.
+
+## Setup
+
+Python 3.12 or newer. Nothing to install: there is no package manifest, no virtual environment requirement, no build step and no lint step. On Windows the interpreter is `python`; on Linux it is `python3`.
+
+## Commands
+
+All of them were run during preparation on Windows 11 with Python 3.13.14, from the repository root (the server on port 18791 and a scratch data directory instead of the values shown).
+
+Run the tests (59 tests, about 4 seconds):
+
+```
+python -m unittest discover -s tests
+```
+
+The run is good when the last line is `OK`.
+
+A single test: `python -m unittest tests.test_pdfparse.SampleRoundTrip.test_exact_display_list`.
+
+Run the server (binds `127.0.0.1` only; `--data-dir` and `--port` are both required; the directory is created if missing; stop with Ctrl+C):
+
+```
+python -m pdf_annotator --data-dir ./data --port 8765
+```
+
+`--port 0` picks a free port and prints it. `data/` and `*.sqlite*` are ignored by Git. For experiments, use a scratch directory outside the repository and delete it afterwards.
+
+Quick check that a running server answers:
+
+```
+curl -s http://127.0.0.1:8765/api/v1/health
+```
+
+Expected: `{"status": "ok", "version": "0.1.0", "schema_version": 1}`.
+
+On Windows, `kill` from Git Bash can leave the Python process running. Stop a server you started in the background by process id (`taskkill //PID <pid> //F` or `Stop-Process -Id <pid>`), then confirm that nothing listens on the port.
+
+## Hard rules
+
+These come from PRD sections 3 to 5 and 9. A change that breaks one needs the owner's approval first, not a pull request.
+
+- Standard library only, in the application and in the tests. No pip or npm dependency, no build tooling, no CDN, font, image or script from another host. `zlib` and `sqlite3` are standard library and are allowed.
+- Loopback only. The server binds `127.0.0.1`. No CORS headers. No outgoing request from the server, the page or the tests.
+- No accounts, sign-in, remote sync, hosting or model integration.
+- PDF bytes are untrusted input. Nothing in a file is evaluated or executed. No buffer, list or loop is sized from a number declared in a file before that number is checked against a fixed limit. Decompression is capped while it runs, not after. Unsupported structures are refused with a code; they are not guessed at.
+- The page never receives raw PDF bytes to interpret and never uses a browser PDF plug-in. It draws the display list from the server.
+- Document text and note text are data. They reach the page through `textContent`, form values, canvas drawing or DOM nodes built with `createElement`, never through `innerHTML`, `outerHTML`, `insertAdjacentHTML`, `document.write` or `eval`. No inline script or style: the CSP forbids it.
+- Static files are served from the fixed allowlist in `pdf_annotator/server.py`. Request input is never joined into a file path. A document id from a request is matched against a fixed pattern before it is used for anything.
+- Fixtures are generated by code in this repository. No third-party or private PDF, font or image is committed. An external tool or reference file needs the owner's approval before it is added.
+- Tests use a temporary directory and port 0. No fixed port, no network, no dependence on wall-clock timing for a pass.
+
+## Architecture boundaries
+
+Details and line references are in [docs/architecture.md](docs/architecture.md). The short form:
+
+- `pdf_annotator/__main__.py`, `pdf_annotator/cli.py`: command line only. Arguments, start, clean stop, exit code 2 on an unusable data directory.
+- `pdf_annotator/server.py`: HTTP only. Routing, request guards (Host, Origin, body cap, media type), static allowlist, security headers, JSON encoding, the generic 500. It never runs SQL and never reads PDF syntax.
+- `pdf_annotator/pdfparse.py`: bytes in, display list out, `PdfError(code, message)` on refusal. Pure: no network, no file system, no database. All limits are named constants at the top of the module.
+- `pdf_annotator/pdfgen.py`: the deterministic sample. Its bytes must not change without a matching change to PRD section 7 and the tests.
+- `pdf_annotator/storage.py`: the only module that imports `sqlite3`. Migrations by `PRAGMA user_version`, one connection per operation, every write inside one `BEGIN IMMEDIATE` transaction. It never touches HTTP objects.
+- `pdf_annotator/static/`: one page, native JavaScript, no framework. It talks to the server through `/api/v1` only and stores nothing in the browser.
+- `tests/`: `unittest`. `test_pdfparse.py` drives the parser with bytes built in the test, `test_storage.py` drives `Storage` and the command line, `test_api.py` drives a real server on port 0 over `http.client`. `tests/__init__.py` holds the PDF builder `build_pdf`.
+
+Keep new code on the correct side of these lines. A new module is right when a file would otherwise take on a second job (for example the cross-reference reader, the content interpreter, an image decoder, a geometry mapping or the export writer).
+
+Rules that every change must keep:
+
+- A save succeeds only when `base_revision` equals the stored revision. A stale save changes nothing and answers 409 with the stored row under `current`. Any new write (region create, update, delete) uses the same check inside one transaction.
+- Existing databases open under new code. A schema change is a new entry at the end of `_MIGRATIONS`, never an edit of an old one, with a test that opens a database made by the previous version. A database newer than the code is refused untouched.
+- Every route checks `Host`. Every mutating route also checks `Origin` when the header is present. Error responses use the envelope `{"error": {"code", "message"}}` and never contain a traceback.
+- Every parser limit is enforced before the work it bounds, has a test at the limit and one past it, and is listed in the README "Limits" section.
+- Whatever is drawn on the canvas also appears in the text equivalent under it.
+- Typed text is never discarded without the person choosing it.
+
+## Git workflow
+
+- `main` is the default branch. CI runs on every pull request (see Delivery workflow). Checks are also run locally and reported with their output.
+- One branch per issue. The repository has no naming rule yet; `<issue-number>-<short-slug>` is the suggested form. Small commits with imperative subjects and a type prefix, as in the existing history (`feat:`, and by extension `fix:`, `docs:`, `test:`, `chore:`).
+- Push the ticket branch only when the owner asked in the current session; a `/next-ticket` run counts as that request, for that run. Open a draft pull request that names the issue (`Part of #1`, `Closes #n`) only after both gates passed on the current diff, and mark it ready only when CI is green. Do not merge your own pull request and do not push to `main`.
+- Never commit a data directory, a SQLite file, `.env*`, `.prep/`, or a PDF that the repository's own code did not generate.
+- Do not change `.claude/agents/`, `LOOP.md`, `loop-constraints.md` or `loop-budget.md` as part of a feature ticket.
+
+## Evidence before a ticket is called done
+
+Put these in the pull request description. Paste real output; do not summarise a run you did not make.
+
+1. The output tail of `python -m unittest discover -s tests` from a clean checkout, with the Python version and the operating system. State the test count before and after the change, and name any existing test that was edited and why.
+2. For each acceptance criterion of the issue: the name of the test that proves it, or the exact manual step and what was observed.
+3. For a parser change: for each new structure, the test that feeds a valid fixture and the tests that feed the hostile variants (over the cap, truncated, looping), with the error code each one returns. State every limit that was added or changed and show the README "Limits" diff.
+4. For a schema change: the test that opens a database created by the previous schema version, and the new `user_version`.
+5. For a new or changed route: one request and response pair per success and per error code, taken from a server started with `--port 0` on a scratch data directory, and the PRD section 6.1 diff.
+6. For a change under `pdf_annotator/static/`: a browser run on `http://127.0.0.1:<port>/` with the browser name and version, the viewport sizes checked (800x600 and 360x640), keyboard-only operation of the changed controls, the text equivalent of what was drawn, and the console and network log free of errors and of external requests. Browser checks are manual: the repository has no approved browser automation.
+7. `git status` showing no stray files, and confirmation that no dependency, external URL, non-loopback listener or third-party file was added.
+8. Anything not verified, said plainly.
+
+CI is not part of this list for the gates. The order is fixed: local checks pass, Code Reviewer then Reality Checker run on the full diff and the recorded local evidence, only then the draft pull request is opened, CI runs on it, and the pull request is marked ready only when CI is green (`gh pr checks`). Reality Checker checks the local evidence and that CI is configured to run the documented checks; it is not asked to confirm a CI result. The driver checks green CI before `gh pr ready`. If CI fails, fix, re-run the local checks and both gates, and push.
+
+## Agent roles and ticket work
+
+When asked to implement, continue or finish a GitHub issue, follow the playbook in [`.claude/skills/implement-ticket/SKILL.md`](.claude/skills/implement-ticket/SKILL.md). Claude Code loads it on its own for ticket work; `/implement-ticket <issue number>` starts it by hand.
+
+The roles are Claude Code subagents in `.claude/agents/`. Each role file starts with a section "In this repository", written for this project: the rules that bind the role, the files it owns or reviews, its commands or the output it must be given, its checklist and what it hands back. That section and this file override the generic upstream text below it. Sources, licence, local changes and the name collision with a user-level install are in [.claude/agency-agents/README.md](.claude/agency-agents/README.md).
+
+Delegate without waiting to be asked. Each role's `description` ends with a "Use proactively ..." sentence, which is what makes Claude Code do so.
+
+| When | Role and trigger | Access |
+|---|---|---|
+| Before coding | Codebase Onboarding Engineer (unfamiliar area); Software Architect (module boundary, data model, schema, public API or dependency) | `Read, Grep, Glob` |
+| While coding | Backend Architect (`pdf_annotator/*.py`); Frontend Developer (`pdf_annotator/static/`) | can edit |
+| While coding | Database Optimizer (SQL, schema, `pdf_annotator/storage.py`) | `Read, Grep, Glob` |
+| After coding | Application Security Engineer (parsing, upload, request guards, untrusted data); Accessibility Auditor (page, keyboard, focus, markup) | `Read, Grep, Glob` |
+| After coding | API Tester (routes, status codes, contracts; writes `unittest` cases in `tests/`) | can edit |
+| Gates on every ticket | Code Reviewer on the full diff, then Reality Checker on the acceptance criteria and the evidence | `Read, Grep, Glob` |
+
+- The two gates run on every ticket, whatever its size. A ticket is not done until the review gate has no material finding left and the acceptance gate passes.
+- Roles limited to `Read, Grep, Glob` (the seven above and `loop-verifier`) cannot run commands: give them the diff, the acceptance criteria and the recorded command output.
+- The session or role that wrote a change does not count as its reviewer.
+- In the pull request description, under "Agent roles run", list each role that ran, what it was asked and its verdict, and any step you did yourself because a role was missing.
+
+## Delivery workflow
+
+How a ticket gets from the backlog to a ready pull request. Each piece is defined in its own file; this part only links them.
+
+- Driver and playbook: the owner starts one ticket with `/next-ticket` ([`.claude/skills/next-ticket/SKILL.md`](.claude/skills/next-ticket/SKILL.md)), which runs [`.claude/skills/implement-ticket/SKILL.md`](.claude/skills/implement-ticket/SKILL.md). Starting it is the owner's go signal and the request to push the ticket branch and open the pull request.
+- Gate hook: [`.claude/hooks/role_gate.py`](.claude/hooks/role_gate.py), wired in [`.claude/settings.json`](.claude/settings.json), blocks `gh pr create` (including `--draft`) and `gh pr ready` until Code Reviewer and Reality Checker ran after the last code edit. `ROLE_GATE=off` in the environment Claude Code is started from switches it off for that session; only the owner does that.
+- Permissions: the allow, ask and deny rules are in `.claude/settings.json`. Pushes to `main`, force pushes, merges and releases are denied; edits to CI, agent configuration and Loop files ask first.
+- CI: [`.github/workflows/ci.yml`](.github/workflows/ci.yml). It runs on the draft pull request, after the local checks and both gates; the `test` job must be green before the pull request is marked ready.
+- Pull request: fill in [`.github/pull_request_template.md`](.github/pull_request_template.md). Tickets use [`.github/ISSUE_TEMPLATE/implementation-ticket.md`](.github/ISSUE_TEMPLATE/implementation-ticket.md).
+- Labels: `status:ready`, `status:blocked`, `status:in-progress`, `needs-decision`; epic #1 gives the dependency order.
+- Changelog: every ticket pull request adds one line to [CHANGELOG.md](CHANGELOG.md).
+- UI and writing: [docs/ui-quality.md](docs/ui-quality.md) binds every screen; copy, documentation and pull request text go through the `unslop` skill.
+- Decisions, security, release: [docs/owner-decisions.md](docs/owner-decisions.md), [SECURITY.md](SECURITY.md), [docs/RELEASING.md](docs/RELEASING.md).
+- Only the owner merges and releases.
+
+## Loop
+
+Issue triage runs at L1: report-only, started by hand, no scheduler, no GitHub writes. See [LOOP.md](LOOP.md).
