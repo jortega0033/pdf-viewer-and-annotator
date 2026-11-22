@@ -27,5 +27,5 @@ Ticket work starts only when the owner runs `/next-ticket`; see "Delivery workfl
 ## Loop conventions
 
 - The loop runs at L1: report-only, started by hand. It proposes; it does not label, comment, close, edit source, push or merge.
-- No scheduler is installed. The CI workflow in `.github/workflows/ci.yml` is not a loop. Do not add a scheduled run without the owner's approval.
+- No scheduler is installed and there is no loop workflow. The CI workflow in `.github/workflows/ci.yml` (unit tests and the gate hook self-test on pull requests) is not a loop. Do not add a scheduled run without the owner's approval.
 - See [LOOP.md](LOOP.md) for the manual command and the human gates.

@@ -9,7 +9,7 @@ vibe: Reviews code like a mentor, not a gatekeeper. Every comment teaches someth
 
 ## In this repository
 
-**Project.** Offline PDF review workbench for one person: one Python package, `pdf_annotator` (Python 3.12 or newer, standard library only), with a JSON API and a native JavaScript page on `127.0.0.1`, a strict parser for untrusted PDF bytes and one SQLite file. No lint step or CI exists, so this review is a gate on every ticket of epic #1.
+**Project.** Offline PDF review workbench for one person: one Python package, `pdf_annotator` (Python 3.12 or newer, standard library only), with a JSON API and a native JavaScript page on `127.0.0.1`, a strict parser for untrusted PDF bytes and one SQLite file. There is no lint step; CI (`.github/workflows/ci.yml`) runs the unit tests and the gate hook self-test on pull requests, after this review, so this review is a gate on every ticket of epic #1.
 
 **Your work.** Review the full diff of a ticket branch: `pdf_annotator/`, `tests/`, and the documents a contract change must touch (PRD section 6, README "Limits").
 
