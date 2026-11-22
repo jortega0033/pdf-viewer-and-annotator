@@ -14,16 +14,17 @@ Rules in `CLAUDE.md` and `docs/owner-decisions.md` bind this run. Where they dif
 ## Steps
 
 1. **Refresh the queue.** `gh issue list --state open --limit 100` and `gh issue view 1`. A ticket labelled `status:blocked` whose blocking tickets are all closed becomes `status:ready` (`gh issue edit <n> --add-label status:ready --remove-label status:blocked`).
-2. **Pick one ticket.** With an issue number, use that one and check it is open and not blocked. Without one, take the first `status:ready` child of epic #1 in the epic's dependency order (table "Tickets in dependency order") that is not `status:in-progress` and not `needs-decision`. If none qualifies, say why and stop.
+2. **Pick one ticket.** With an issue number, use that one, but apply the same exclusions: it must be open, not `status:blocked`, not `status:in-progress` and not `needs-decision`; otherwise say why and stop. Without a number, take the first `status:ready` child of epic #1 in the epic's dependency order (table "Tickets in dependency order") that is not `status:in-progress` and not `needs-decision`. If none qualifies, say why and stop.
 3. **Claim it.** `gh issue edit <n> --add-label status:in-progress`.
-4. **Fresh worktree and branch.** From an up-to-date `main`: `git worktree add ../pdf-viewer-and-annotator-<n> -b <n>-<short-slug> main`. Work only there. Never work on `main`.
+4. **Fresh worktree and branch, inside the project.** Run `git fetch origin`, then create the ticket worktree under `.claude/worktrees/` (ignored by git) from `origin/main` and make it the session's working directory: use Claude Code's built-in worktree support (the `EnterWorktree` tool), or `git worktree add .claude/worktrees/<n> -b <n>-<short-slug> origin/main` followed by `cd` into it. Do not create it outside the project directory: hook events would keep the main checkout as `cwd` and the review gate (`role_gate.py`) would check the wrong diff. Work only there. Never work on `main`.
 5. **Implement.** Follow `.claude/skills/implement-ticket/SKILL.md` to the end, including both gates on the current diff, the CHANGELOG line and the `unslop` pass.
-6. **Push and open the pull request.** Only after both gates passed on the current diff: push the branch (`git push -u origin <branch>`) and open a draft pull request from the template that says `Closes #<n>`. The gate hook blocks this until the gates ran.
+6. **Push and open the pull request.** Only after both gates passed on the current diff: push the branch (`git push -u origin <branch>`) and open a draft pull request from the template that says `Closes #<n>`. Run `gh pr create` and `gh pr ready` with the session's working directory in the ticket worktree. The gate hook blocks this until the gates ran.
 7. **Wait for CI.** `gh pr checks <pr> --watch`. Fix and re-run the gates if code changes. If CI cannot go green, stop and report; do not mark the pull request ready.
 8. **Mark ready and report.** When CI is green: `gh pr ready <pr>`, then comment on the issue with the pull request link, the evidence summary and anything not verified.
 
 ## Limits
 
+- `gh issue edit` (steps 1 and 3) and the issue comment (step 8) are not in `permissions.allow`, so each prompts for approval. This is intended.
 - One ticket per run. Never start another run.
 - Never merge, never push to `main`, never release. Only the owner merges.
 - An open owner decision in the ticket is settled by its stated default (`docs/owner-decisions.md`); where the ticket states none, take the conservative option and say so in the issue. A decision that blocks the ticket stops the run.

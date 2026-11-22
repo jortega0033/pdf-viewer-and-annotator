@@ -99,3 +99,4 @@ This pass added, without changing any role's upstream text:
 - The review gate hook `.claude/hooks/role_gate.py` with `GATE_ROLES` set to Code Reviewer and Reality Checker (both installed here), and `.claude/settings.json`.
 - The skills `next-ticket`, `ui-ux-pro-max` and `unslop` under `.claude/skills/`, and the updated `implement-ticket` steps.
 - CI (`.github/workflows/ci.yml`), the pull request and ticket templates, `CODEOWNERS`, `dependabot.yml`, `SECURITY.md`, `CHANGELOG.md`, `docs/RELEASING.md`, `docs/ui-quality.md` and `docs/owner-decisions.md`.
+- Review fix: `next-ticket` step 4 now creates the ticket worktree under `.claude/worktrees/` (via `EnterWorktree` or `git worktree add` plus `cd`) from `origin/main`, so the session's working directory is the worktree and `role_gate.py` checks the ticket diff. `.claude/worktrees/` is git-ignored.
