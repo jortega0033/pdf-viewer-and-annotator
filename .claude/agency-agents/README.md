@@ -90,3 +90,12 @@ This supersedes any statement above that a role file is unmodified or that the `
 The steps at which each role runs are in `.claude/skills/implement-ticket/SKILL.md`.
 
 Verification, 2026-11-22: with the sections in place, one headless run from the repository root with Claude Code 2.1.323 (`claude -p "List every project subagent defined in .claude/agents with its exact name and tools, say for each whether its instructions begin with a section titled In this repository, and say whether a skill named implement-ticket is available. Plain list, no commentary." --model haiku`) exited 0 and listed all eleven names. Code Reviewer, Codebase Onboarding Engineer, Database Optimizer, Software Architect, Application Security Engineer, Accessibility Auditor, Reality Checker and `loop-verifier` were listed with `Read, Grep, Glob`; Backend Architect, Frontend Developer and API Tester with no tool limit. Each of the ten Agency Agents roles was reported as beginning with "In this repository", `loop-verifier` as not, and the skill `implement-ticket` as available. Not shown by this run: a role actually launched with the new section, automatic delegation during a real ticket, and behaviour in an interactive session. The answer is a model's listing, so it is evidence that the files parse and load, not proof of how each role behaves.
+
+## Local change: SDLC kit (2026-11-22)
+
+This pass added, without changing any role's upstream text:
+
+- One checklist line naming `docs/ui-quality.md` in the "In this repository" section of Frontend Developer, Accessibility Auditor and Code Reviewer. UI Designer and UX Architect are not installed in this repository.
+- The review gate hook `.claude/hooks/role_gate.py` with `GATE_ROLES` set to Code Reviewer and Reality Checker (both installed here), and `.claude/settings.json`.
+- The skills `next-ticket`, `ui-ux-pro-max` and `unslop` under `.claude/skills/`, and the updated `implement-ticket` steps.
+- CI (`.github/workflows/ci.yml`), the pull request and ticket templates, `CODEOWNERS`, `dependabot.yml`, `SECURITY.md`, `CHANGELOG.md`, `docs/RELEASING.md`, `docs/ui-quality.md` and `docs/owner-decisions.md`.

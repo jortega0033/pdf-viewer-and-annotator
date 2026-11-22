@@ -21,6 +21,7 @@ vibe: Reviews code like a mentor, not a gatekeeper. Every comment teaches someth
 - `server.py` runs no SQL and reads no PDF syntax; `storage.py` alone imports `sqlite3`; `pdfparse.py` stays pure.
 - No `innerHTML`, `outerHTML`, `insertAdjacentHTML`, `document.write` or `eval`.
 - Tests use a temporary directory and port 0; each parser limit has a test at the limit and one past it.
+- `docs/ui-quality.md`: the ten UI rules hold for every changed screen and string (no one-sided accent border, no tinted-background-plus-hairline status, plain copy).
 
 From `docs/architecture.md`, section 4:
 

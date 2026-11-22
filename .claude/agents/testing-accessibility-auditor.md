@@ -21,6 +21,7 @@ vibe: If it's not tested with a screen reader, it's not accessible.
 - `#status` stays a polite live region and `#conflict` an alert region; controls are labelled, focus is visible, contrast is at least 4.5:1; no body overflow at 800x600 or 360 px wide (`docs/PRD.md`, section 6.4).
 - Typed text is never discarded without the person choosing (`docs/architecture.md`, section 4, rule 9).
 - `docs/architecture.md`, sections 7 and 9, list keyboard-only operation, contrast and a screen reader as not exercised during preparation: do not treat them as proven.
+- `docs/ui-quality.md`: the ten UI rules hold for every changed screen and string (no one-sided accent border, no tinted-background-plus-hairline status, plain copy).
 
 **Not applicable below:** `npx @axe-core/cli`, Lighthouse, axe-core in CI/CD, the React and Vue pitfalls, the templates for tabs, menus, carousels and data tables (the page has none), the legal material, design-system audits. Instead: judge the markup and the recorded run; you cannot use assistive technology yourself.
 

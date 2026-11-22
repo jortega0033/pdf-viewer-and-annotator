@@ -22,8 +22,10 @@ The server binds `127.0.0.1` only. `--data-dir` and `--port` are both required. 
 
 To implement an issue, follow the steps in [.claude/skills/implement-ticket/SKILL.md](.claude/skills/implement-ticket/SKILL.md) and the section "Agent roles and ticket work" in [CLAUDE.md](CLAUDE.md). The role definitions are in `.claude/agents/`; each starts with a section "In this repository". An agent that cannot start Claude Code subagents uses those files as the instructions for each step and says in the pull request which steps it did itself.
 
+Ticket work starts only when the owner runs `/next-ticket`; see "Delivery workflow" in [CLAUDE.md](CLAUDE.md).
+
 ## Loop conventions
 
 - The loop runs at L1: report-only, started by hand. It proposes; it does not label, comment, close, edit source, push or merge.
-- No scheduler and no workflow file is installed. Do not add one without the owner's approval.
+- No scheduler is installed. The CI workflow in `.github/workflows/ci.yml` is not a loop. Do not add a scheduled run without the owner's approval.
 - See [LOOP.md](LOOP.md) for the manual command and the human gates.

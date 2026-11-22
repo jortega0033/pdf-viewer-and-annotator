@@ -15,6 +15,7 @@ An offline workbench for one person who reviews a PDF and keeps notes on it. One
 | Launch, smoke steps, limits, baseline verification | [README.md](README.md) |
 | Backlog | Epic issue #1 and its sub-issues on GitHub: #7, #8, #2, #3, #4, #9, #5, #6, #10, in dependency order. The epic gives the dependencies, the parallel tracks and the estimates. |
 | Loop setup and its limits | [LOOP.md](LOOP.md), [loop-constraints.md](loop-constraints.md) |
+| Delivery workflow, owner decisions, UI rules | [docs/owner-decisions.md](docs/owner-decisions.md), [docs/ui-quality.md](docs/ui-quality.md) |
 | Project subagents and their origin | [.claude/agency-agents/README.md](.claude/agency-agents/README.md) |
 
 When the PRD and the code disagree, the code is the baseline and [docs/architecture.md](docs/architecture.md) records the difference. A ticket that changes a contract updates PRD section 6 and the README "Limits" section in the same pull request.
@@ -94,9 +95,9 @@ Rules that every change must keep:
 
 ## Git workflow
 
-- `main` is the default branch and is not protected. There is no CI. Checks are run locally and reported with their output.
+- `main` is the default branch. CI runs on every pull request (see Delivery workflow). Checks are also run locally and reported with their output.
 - One branch per issue. The repository has no naming rule yet; `<issue-number>-<short-slug>` is the suggested form. Small commits with imperative subjects and a type prefix, as in the existing history (`feat:`, and by extension `fix:`, `docs:`, `test:`, `chore:`).
-- Open a draft pull request that names the issue (`Part of #1`, `Closes #n`). Do not merge your own pull request and do not push to `main`.
+- Push the ticket branch only when the owner asked in the current session; a `/next-ticket` run counts as that request, for that run. Open a draft pull request that names the issue (`Part of #1`, `Closes #n`) only after both gates passed on the current diff, and mark it ready only when CI is green. Do not merge your own pull request and do not push to `main`.
 - Never commit a data directory, a SQLite file, `.env*`, `.prep/`, or a PDF that the repository's own code did not generate.
 - Do not change `.claude/agents/`, `LOOP.md`, `loop-constraints.md` or `loop-budget.md` as part of a feature ticket.
 
@@ -110,7 +111,7 @@ Put these in the pull request description. Paste real output; do not summarise a
 4. For a schema change: the test that opens a database created by the previous schema version, and the new `user_version`.
 5. For a new or changed route: one request and response pair per success and per error code, taken from a server started with `--port 0` on a scratch data directory, and the PRD section 6.1 diff.
 6. For a change under `pdf_annotator/static/`: a browser run on `http://127.0.0.1:<port>/` with the browser name and version, the viewport sizes checked (800x600 and 360x640), keyboard-only operation of the changed controls, the text equivalent of what was drawn, and the console and network log free of errors and of external requests. Browser checks are manual: the repository has no approved browser automation.
-7. `git status` showing no stray files, and confirmation that no dependency, external URL, non-loopback listener or third-party file was added.
+7. Green CI on the pull request (`gh pr checks`), and `git status` showing no stray files, and confirmation that no dependency, external URL, non-loopback listener or third-party file was added.
 8. Anything not verified, said plainly.
 
 ## Agent roles and ticket work
@@ -134,6 +135,21 @@ Delegate without waiting to be asked. Each role's `description` ends with a "Use
 - Roles limited to `Read, Grep, Glob` (the seven above and `loop-verifier`) cannot run commands: give them the diff, the acceptance criteria and the recorded command output.
 - The session or role that wrote a change does not count as its reviewer.
 - In the pull request description, under "Agent roles run", list each role that ran, what it was asked and its verdict, and any step you did yourself because a role was missing.
+
+## Delivery workflow
+
+How a ticket gets from the backlog to a ready pull request. Each piece is defined in its own file; this part only links them.
+
+- Driver and playbook: the owner starts one ticket with `/next-ticket` ([`.claude/skills/next-ticket/SKILL.md`](.claude/skills/next-ticket/SKILL.md)), which runs [`.claude/skills/implement-ticket/SKILL.md`](.claude/skills/implement-ticket/SKILL.md). Starting it is the owner's go signal and the request to push the ticket branch and open the pull request.
+- Gate hook: [`.claude/hooks/role_gate.py`](.claude/hooks/role_gate.py), wired in [`.claude/settings.json`](.claude/settings.json), blocks `gh pr create` and `gh pr ready` until Code Reviewer and Reality Checker ran after the last code edit. `ROLE_GATE=off` in the environment Claude Code is started from switches it off for that session; only the owner does that.
+- Permissions: the allow, ask and deny rules are in `.claude/settings.json`. Pushes to `main`, force pushes, merges and releases are denied; edits to CI, agent configuration and Loop files ask first.
+- CI: [`.github/workflows/ci.yml`](.github/workflows/ci.yml). The `test` job must be green before a pull request is marked ready.
+- Pull request: fill in [`.github/pull_request_template.md`](.github/pull_request_template.md). Tickets use [`.github/ISSUE_TEMPLATE/implementation-ticket.md`](.github/ISSUE_TEMPLATE/implementation-ticket.md).
+- Labels: `status:ready`, `status:blocked`, `status:in-progress`, `needs-decision`; epic #1 gives the dependency order.
+- Changelog: every ticket pull request adds one line to [CHANGELOG.md](CHANGELOG.md).
+- UI and writing: [docs/ui-quality.md](docs/ui-quality.md) binds every screen; copy, documentation and pull request text go through the `unslop` skill.
+- Decisions, security, release: [docs/owner-decisions.md](docs/owner-decisions.md), [SECURITY.md](SECURITY.md), [docs/RELEASING.md](docs/RELEASING.md).
+- Only the owner merges and releases.
 
 ## Loop
 

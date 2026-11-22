@@ -25,6 +25,7 @@ Browser checks are manual; no browser automation is approved. Record (`CLAUDE.md
 - Whatever is drawn on the canvas also appears in the text equivalent; the page talks to `/api/v1` only and stores nothing in the browser (`CLAUDE.md`, "Architecture boundaries").
 - Typed text is never discarded without the person choosing (`docs/architecture.md`, section 4, rule 9).
 - Labelled controls, visible focus, contrast of at least 4.5:1, no body overflow at 800x600 or 360 px wide (`docs/PRD.md`, section 6.4).
+- `docs/ui-quality.md`: the ten UI rules hold for every changed screen and string (no one-sided accent border, no tinted-background-plus-hairline status, plain copy).
 
 **Not applicable below:** React, Vue, Angular, Svelte, TypeScript, bundling, service workers, Lighthouse and Core Web Vitals targets, CI/CD, automated component tests. Instead: hand-written files and the manual browser record.
 
