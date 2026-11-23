@@ -16,6 +16,7 @@ A dated record of the decisions the owner made for this repository, so the rules
 | 10 | Open decisions on tickets are settled with the ticket's stated default (list below). | 2026-11-22 | epic #1 "Decisions for the owner", `.claude/skills/next-ticket/SKILL.md` |
 | 12 | The ten UI rules in `docs/ui-quality.md` are binding, and the `ui-ux-pro-max` and `unslop` skills are installed in the repository and used for UI work and for copy. | 2026-11-22 | `docs/ui-quality.md`, `.claude/skills/ui-ux-pro-max/`, `.claude/skills/unslop/`, `.claude/skills/implement-ticket/SKILL.md` |
 | 13 | Visual system: Pipenzo Flow look tokens (docs/design-tokens.md). SDLC kit version: jortega0033/sdlc-kit v1.0.0. | 2026-11-23 | `docs/design-tokens.md`, `pdf_annotator/static/tokens.css` |
+| 14 | Accent, selection, focus ring, themes and linking rules for the token system (list below). | 2026-11-23 | `docs/design-tokens.md` |
 
 Entry 11 (Rust verified in CI only) does not apply: this repository has no Rust code.
 
@@ -33,3 +34,16 @@ Source: epic #1, section "Decisions for the owner". Date 2026-11-22.
 | #1 (decision 6) | #9 beyond PRD milestone P2 | Keep it in the batch. |
 | #1 (decision 7) | Independent checker for the export | `pdftotext` when installed, otherwise a skip, plus one manual check in a reader (#6). |
 | #1 (decision 8) | JavaScript tests | The self-check page from #4; no JavaScript test runner. |
+
+## Entry 14: accent, selection, focus and themes
+
+Date 2026-11-23. Only D1 (the rule itself) is a decision of the owner; the other items are recommendations of the orchestrator adopted under the owner's delegation of the same day.
+
+| Id | Decision | Source |
+|---|---|---|
+| D1 | Current selection: the yellow accent is used for the primary action, the current-step marker and the current selection (UI rule 8). | Decided by the owner on 2026-11-23. |
+| D1 (how) | A selection uses a solid `--primary` fill with `--on-primary` text (not only a yellow border, which has about 1.5:1 against white on light), plus a second sign that is not colour (weight, icon or text) and the existing aria attribute. Never a tint with a same-hue border and never a thick one-sided border. | Recommended by the orchestrator, adopted under the owner's delegation of the same day. |
+| D2 | Focus ring: `--focus` is a focus indicator, exempt from the accent limit, including where it is yellow in dark. A ticket that says the focus style stays unchanged means the rule on `main` after the token pull request. | Recommended by the orchestrator, adopted under the owner's delegation of 2026-11-23. |
+| D3 | Themes: contrast and no-colour-alone checks cover both the light and the dark block of `tokens.css`. | Recommended by the orchestrator, adopted under the owner's delegation of 2026-11-23. |
+| D4 | Linking: a ticket that creates a page or its static allowlist links `tokens.css` before any other stylesheet and serves it (allowlist and its test). | Recommended by the orchestrator, adopted under the owner's delegation of 2026-11-23. |
+| D5 | release-dependency-planner: while a plan is open only one yellow primary button shows; "New plan" (`#new-plan`) becomes neutral, in ticket #11. | Recommended by the orchestrator, adopted under the owner's delegation of 2026-11-23. |
