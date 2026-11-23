@@ -63,14 +63,17 @@ button {
   font: inherit;
   min-height: 40px;
   padding: 6px 14px;
-  color: var(--on-primary);
-  background: var(--primary);
-  border: 2px solid var(--primary);
+  color: var(--fg);
+  background: var(--bg-raised);
+  border: 2px solid var(--control-border);
   border-radius: 4px;
   cursor: pointer;
 }
 
-button:hover:not(:disabled) { background: var(--primary-press); border-color: var(--primary-press); }
+button:hover:not(:disabled) { background: var(--state-hover); }
+
+#save-note:not(:disabled) { color: var(--on-primary); background: var(--primary); border-color: var(--primary); }
+#save-note:not(:disabled):hover { background: var(--primary-press); border-color: var(--primary-press); }
 
 button:disabled {
   color: var(--faint);
@@ -78,9 +81,6 @@ button:disabled {
   border-color: var(--border);
   cursor: not-allowed;
 }
-
-#retry, #conflict-use-saved { color: var(--fg); background: var(--bg-raised); border-color: var(--control-border); }
-#retry:hover:not(:disabled), #conflict-use-saved:hover:not(:disabled) { color: var(--fg); background: var(--state-selected); }
 
 :focus-visible { outline: 3px solid var(--focus); outline-offset: 2px; }
 
