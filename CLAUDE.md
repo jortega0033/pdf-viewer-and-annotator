@@ -151,6 +151,7 @@ How a ticket gets from the backlog to a ready pull request. Each piece is define
 - Review and CI wait: the read-only reviewers get the diff and evidence as files in `.claude/state/review/` of the ticket worktree. After the draft pull request the run ends its turn with "Draft pull request #N is waiting for CI" and reads `gh pr checks` once when woken; it does not poll. Acceptance steps that need a person go under "Owner checks" in the pull request.
 - Changelog: every ticket pull request adds one line to [CHANGELOG.md](CHANGELOG.md).
 - UI and writing: [docs/ui-quality.md](docs/ui-quality.md) binds every screen; copy, documentation and pull request text go through the `unslop` skill.
+- Colours: [docs/design-tokens.md](docs/design-tokens.md) lists the Pipenzo tokens in `pdf_annotator/static/tokens.css`; new UI uses them and adds no colour literal.
 - Decisions, security, release: [docs/owner-decisions.md](docs/owner-decisions.md), [SECURITY.md](SECURITY.md), [docs/RELEASING.md](docs/RELEASING.md).
 - Only the owner merges and releases.
 
