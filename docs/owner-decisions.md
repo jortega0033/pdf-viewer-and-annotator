@@ -16,7 +16,7 @@ A dated record of the decisions the owner made for this repository, so the rules
 | 10 | Open decisions on tickets are settled with the ticket's stated default (list below). | 2026-11-22 | epic #1 "Decisions for the owner", `.claude/skills/next-ticket/SKILL.md` |
 | 12 | The ten UI rules in `docs/ui-quality.md` are binding, and the `ui-ux-pro-max` and `unslop` skills are installed in the repository and used for UI work and for copy. | 2026-11-22 | `docs/ui-quality.md`, `.claude/skills/ui-ux-pro-max/`, `.claude/skills/unslop/`, `.claude/skills/implement-ticket/SKILL.md` |
 | 13 | Visual system: Pipenzo Flow look tokens (docs/design-tokens.md). SDLC kit version: jortega0033/sdlc-kit v1.0.0. | 2026-11-23 | `docs/design-tokens.md`, `pdf_annotator/static/tokens.css` |
-| 14 | Accent, selection, focus ring, themes and linking rules for the token system (list below). | 2026-11-23 | `docs/design-tokens.md` |
+| 14 | Accent, selection, focus ring, themes and linking rules for the token system (list below). | 2026-11-23 | `docs/design-tokens.md`, `docs/ui-quality.md` |
 
 Entry 11 (Rust verified in CI only) does not apply: this repository has no Rust code.
 
