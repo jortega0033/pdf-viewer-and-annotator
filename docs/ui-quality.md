@@ -21,3 +21,4 @@ These ten rules bind every change to `pdf_annotator/static/` and every user-faci
 - No script enforces them. Rule 1 can be found with a search for `border-left` and `border-right` in `pdf_annotator/static/app.css`; rule 2 cannot be detected reliably from CSS and needs a reader.
 - The page is one native HTML, CSS and JavaScript page with no inline style (the CSP forbids it), so every style lives in `pdf_annotator/static/app.css`. The repository's other hard rules (no external fonts, images or scripts) still apply.
 - Colours come from the Pipenzo tokens in `pdf_annotator/static/tokens.css`; see [design-tokens.md](design-tokens.md). New UI uses the tokens and adds no colour literal.
+- Rule 8 is read with the "Accent, selection, focus and themes" section of [design-tokens.md](design-tokens.md) and owner decision 14 in [owner-decisions.md](owner-decisions.md): the accent also marks the current step, and `--focus` is a focus indicator, exempt from the accent limit.
