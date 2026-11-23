@@ -93,7 +93,7 @@ class BasicEndpoints(ApiTestCase):
         self.assertIn("malformed", result[2]["error"]["message"])
 
     def test_static_allowlist(self):
-        for path, ctype in (("/", "text/html"), ("/app.css", "text/css"),
+        for path, ctype in (("/", "text/html"), ("/tokens.css", "text/css"), ("/app.css", "text/css"),
                             ("/app.js", "text/javascript")):
             name = {"/": "index.html"}.get(path, path.lstrip("/"))
             f = STATIC_DIR / name

@@ -19,6 +19,7 @@ STATIC_DIR = pathlib.Path(__file__).resolve().parent / "static"
 # Fixed allowlist: request path -> (file name inside STATIC_DIR, content type).
 STATIC_ROUTES = {
     "/": ("index.html", "text/html; charset=utf-8"),
+    "/tokens.css": ("tokens.css", "text/css; charset=utf-8"),
     "/app.css": ("app.css", "text/css; charset=utf-8"),
     "/app.js": ("app.js", "text/javascript; charset=utf-8"),
 }
